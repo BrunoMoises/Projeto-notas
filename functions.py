@@ -28,8 +28,7 @@ def setDownload(filial, doc):
 def profile():
     profile = webdriver.FirefoxProfile()
     profile.set_preference("browser.download.folderList", 2)
-    profile.set_preference(
-        "browser.download.manager.showWhenStarting", False)
+    profile.set_preference("browser.download.manager.showWhenStarting", False)
     profile.set_preference("browser.download.dir", gb.downloadFolder)
     return profile
 
@@ -67,10 +66,7 @@ def getSize(file):
 
 #Subir para servidor por FTP
 def uploadForFTP(nomeFile):
-        HOSTNAME = ""
-        USERNAME = ""
-        PASSWORD = ""
-        ftp_server = ftplib.FTP(HOSTNAME, USERNAME, PASSWORD) 
+        ftp_server = ftplib.FTP(gb.HOSTNAME, gb.USERNAME, gb.PASSWORD) 
         ftp_server.encoding = "utf-8"
         filename = gb.nfseFolder+nomeFile
         ftp_server.cwd("dqanet/nfes")
