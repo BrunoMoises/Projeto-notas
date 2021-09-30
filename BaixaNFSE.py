@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from time import sleep
-import pyautogui
 import functions as fn
 import globalVar as gb
 
@@ -22,7 +22,11 @@ while True:
 
         # Abrir navegador e preenchimento de dados
 
-        driver = webdriver.Firefox(firefox_profile=profile)
+        binary = FirefoxBinary(r'C:\Program Files\Mozilla Firefox\firefox.exe')
+        fp = (r'C:\Users\Administrador\AppData\Roaming\Mozilla\Firefox\Profiles\onv71vtq.default-release')
+        options = webdriver.FirefoxOptions()
+        options.profile = fp
+        driver = webdriver.Firefox(firefox_binary=binary, options = options)
         driver.get(gb.link)
         sleep(2)
         cnpj = driver.find_element_by_id("cnpj")
@@ -34,15 +38,8 @@ while True:
         chave.send_keys(chaveV)
         sleep(1)
         chave.send_keys(Keys.ENTER)
-        sleep(2)
-        dwn = driver.find_element_by_id("download")
-        dwn.send_keys(Keys.ENTER)
         sleep(3)
-        pyautogui.press('enter')
-        sleep(1)
-        pyautogui.hotkey('alt', 'F4')
-        sleep(1)
-
+        driver.quit()
         fn.processFile(nomeFile)
 
         fn.setDownload(row[0], row[1])

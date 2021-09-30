@@ -28,8 +28,9 @@ def setDownload(filial, doc):
 def profile():
     profile = webdriver.FirefoxProfile()
     profile.set_preference("browser.download.folderList", 2)
-    profile.set_preference("browser.download.manager.showWhenStarting", False)
+    profile.set_preference("browser.download.manager.showWhenStarting",False)
     profile.set_preference("browser.download.dir", gb.downloadFolder)
+    profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf")
     return profile
 
 # Pesquisar arquivos e renomear
