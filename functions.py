@@ -35,11 +35,14 @@ def profile():
 
 # Pesquisar arquivos e renomear
 def processFile(nomeFile):
-    for diretorio, subpastas, arquivos in os.walk(gb.downloadFolder):
+    for arquivos in os.walk(gb.downloadFolder):
             for arquivo in arquivos:
                 old_file = os.path.join(gb.downloadFolder, arquivo)
                 new_file = os.path.join(gb.nfseFolder, "%s.pdf" % nomeFile)
-                os.rename(old_file, new_file)
+                if os.path.exists(new_file):
+                    os.remove(old_file)
+                else:
+                    os.rename(old_file, new_file)
 
 # Upload de arquivos para o banco
 def uploadDB(nomeFile):
@@ -51,9 +54,9 @@ def uploadDB(nomeFile):
         conn = connectDB()
         cur = conn.cursor()
         sqlquery = ("insert into file"
-                    " () "
-                    " values ()")
-        sqlargs = ()
+                    " (nome, file) "
+                    " values (?,?)")
+        sqlargs = (nome,arquivo)
         cur.execute(sqlquery, sqlargs)
         conn.commit()
         cur.close()

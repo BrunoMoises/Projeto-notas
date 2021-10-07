@@ -44,7 +44,5 @@ while True:
 
         fn.setDownload(row[0], row[1])
 
-        #fn.uploadDB(nomeFile)
-
 cur.close()
 conn.close()
