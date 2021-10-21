@@ -46,26 +46,41 @@ def processFile(nomeFile):
                     os.rename(old_file, new_file)
 
 # Upload de arquivos para o banco
-def uploadDB(nomeFile,descricao,order,sistema,filtro,codigo):
+def uploadDB(nomeFile,descricao,order,sistema,filtro,codigo,doc_num,nf_num,serie,filial,emissao):
         caminho = pathlib.Path(gb.nfeFolder)
         arquivos = caminho.glob(nomeFile+'*')
         tipo = 1
+        if arquivos:
+            for arquivo in arquivos:
+                nome = os.path.basename(arquivo)
 
-        for arquivo in arquivos:
-            nome = os.path.basename(arquivo)
+                conn = connectDB()
+                cur = conn.cursor()
+                n_par_codigo = cur.var(cx_Oracle.NUMBER)
+                sqlquery = ("INSERT INTO SIAOS.PROP_ARQUIVO"
+                            "(PAR_NOME,PAR_DESCRICAO,ORDER_NO,PAR_TIPO,PAR_ARQUIVO,PAR_SISTEMA,PAR_FILTRO,ACE_CODIGO) "
+                            "VALUES (:1,:2,:3,:4,:5,:6,:7,:8)"
+                            "RETURNING PAR_CODIGO INTO :9")
+                sqlargs = (nome,descricao,order,tipo,arquivo.open('rb').read(),sistema,filtro,codigo,n_par_codigo)
+                cur.execute(sqlquery, sqlargs)
+                n_par_codigo = int(n_par_codigo.getvalue()[0])
+                conn.commit()
+                cur.close()
+                conn.close()
+                if n_par_codigo:
+                    moveFile(doc_num,nf_num,serie,filial,emissao,n_par_codigo)
+        return
 
-            conn = connectDB()
-            cur = conn.cursor()
-            sqlquery = ("INSERT INTO SIAOS.PROP_ARQUIVO"
-                        "(PAR_NOME,PAR_DESCRICAO,ORDER_NO,PAR_TIPO,PAR_SISTEMA,PAR_FILTRO,ACE_CODIGO) "
-                        "VALUES (%s,%s,%s,%s,%s,%s,%s)")
-            sqlargs = (nome,descricao,order,tipo,sistema,filtro,codigo)
-            print(sqlquery)
-            print(sqlargs)
-            cur.execute(sqlquery, sqlargs)
-            conn.commit()
-            cur.close()
-            conn.close()
+# Mover arquivo para pasta correta
+def moveFile(doc_num,nf_num,serie,filial,emissao,n_par_codigo):
+    conn = connectDB()
+    cur = conn.cursor()
+    sqlproc = ("BEGIN SIAOS.PCK_NOTA_FISCAL.SP_NF_ARQUIVO(:1,:2,:3,:4,:5,:6);END;")
+    sqlprocarg = (doc_num,nf_num,serie,filial,emissao,n_par_codigo)
+    cur.execute(sqlproc, sqlprocarg)
+    conn.commit()
+    cur.close()
+    conn.close()
 
 # Obter tamanho do arquivo
 def getSize(file):
