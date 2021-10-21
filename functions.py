@@ -3,6 +3,7 @@ from selenium import webdriver
 import os
 import ftplib
 import globalVar as gb
+import pathlib
 
 # Conectar com banco
 def connectDB():
@@ -45,22 +46,26 @@ def processFile(nomeFile):
                     os.rename(old_file, new_file)
 
 # Upload de arquivos para o banco
-def uploadDB(nomeFile):
-        caminho = gb.nfseFolder+nomeFile
-        arquivo = open(caminho, "rb").read()
-        nome = os.path.basename(caminho)
-        tamanho = getSize(arquivo)
+def uploadDB(nomeFile,descricao,order,sistema,filtro,codigo):
+        caminho = pathlib.Path(gb.nfeFolder)
+        arquivos = caminho.glob(nomeFile+'*')
+        tipo = 1
 
-        conn = connectDB()
-        cur = conn.cursor()
-        sqlquery = ("insert into file"
-                    " (nome, file) "
-                    " values (?,?)")
-        sqlargs = (nome,arquivo)
-        cur.execute(sqlquery, sqlargs)
-        conn.commit()
-        cur.close()
-        conn.close()
+        for arquivo in arquivos:
+            nome = os.path.basename(arquivo)
+
+            conn = connectDB()
+            cur = conn.cursor()
+            sqlquery = ("INSERT INTO SIAOS.PROP_ARQUIVO"
+                        "(PAR_NOME,PAR_DESCRICAO,ORDER_NO,PAR_TIPO,PAR_SISTEMA,PAR_FILTRO,ACE_CODIGO) "
+                        "VALUES (%s,%s,%s,%s,%s,%s,%s)")
+            sqlargs = (nome,descricao,order,tipo,sistema,filtro,codigo)
+            print(sqlquery)
+            print(sqlargs)
+            cur.execute(sqlquery, sqlargs)
+            conn.commit()
+            cur.close()
+            conn.close()
 
 # Obter tamanho do arquivo
 def getSize(file):

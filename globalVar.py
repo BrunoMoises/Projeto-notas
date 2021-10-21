@@ -11,6 +11,7 @@ DBpassword = 'integra'
 nCnpj = "29.321.094/0001-82"
 downloadFolder = r"F:\Area\Operacoes\Faturamento\NFSE_DOWNLOAD"
 nfseFolder = r"F:\Area\Operacoes\Faturamento\NFSE"
+nfeFolder = r"F:\Area\Operacoes\Faturamento\NFE"
 link = 'http://nfe.sertaozinho.sp.gov.br:9083/tbw/loginWeb.jsp?execobj=NFENotaFiscalBuscarDireto'
 
 sqlSelect = """SELECT X.*
