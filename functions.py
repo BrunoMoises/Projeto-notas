@@ -47,32 +47,40 @@ def processFile(nomeFile):
 
 # Upload de arquivos para o banco
 def uploadDB(nomeFile,descricao,order,sistema,filtro,codigo,doc_num,nf_num,serie,filial,emissao):
-        caminho = pathlib.Path(gb.nfeFolder)
+        if serie == 'RPS':
+            caminho = pathlib.Path(gb.nfseFolder)
+        else:
+            caminho = pathlib.Path(gb.nfeFolder)
+
         arquivos = caminho.glob(nomeFile+'*')
         tipo = 1
-        if arquivos:
-            for arquivo in arquivos:
-                nome = os.path.basename(arquivo)
-
-                conn = connectDB()
-                cur = conn.cursor()
-                n_par_codigo = cur.var(cx_Oracle.NUMBER)
-                sqlquery = ("INSERT INTO SIAOS.PROP_ARQUIVO"
-                            "(PAR_NOME,PAR_DESCRICAO,ORDER_NO,PAR_TIPO,PAR_ARQUIVO,PAR_SISTEMA,PAR_FILTRO,ACE_CODIGO) "
-                            "VALUES (:1,:2,:3,:4,:5,:6,:7,:8)"
-                            "RETURNING PAR_CODIGO INTO :9")
-                sqlargs = (nome,descricao,order,tipo,arquivo.open('rb').read(),sistema,filtro,codigo,n_par_codigo)
-                cur.execute(sqlquery, sqlargs)
-                n_par_codigo = int(n_par_codigo.getvalue()[0])
-                conn.commit()
-                cur.close()
-                conn.close()
-                if n_par_codigo:
-                    moveFile(doc_num,nf_num,serie,filial,emissao,n_par_codigo)
+        conn = connectDB()
+        cur = conn.cursor()
+        entrou = 0
+        for arquivo in arquivos:
+            entrou = 1
+            nome = os.path.basename(arquivo)
+            n_par_codigo = cur.var(cx_Oracle.NUMBER)
+            sqlquery = ("INSERT INTO SIAOS.PROP_ARQUIVO"
+                        "(PAR_NOME,PAR_DESCRICAO,ORDER_NO,PAR_TIPO,PAR_ARQUIVO,PAR_SISTEMA,PAR_FILTRO,ACE_CODIGO) "
+                        "VALUES (:1,:2,:3,:4,:5,:6,:7,:8)"
+                        "RETURNING PAR_CODIGO INTO :9")
+            sqlargs = (nome,descricao,order,tipo,arquivo.open('rb').read(),sistema,filtro,codigo,n_par_codigo)
+            cur.execute(sqlquery, sqlargs)
+            n_par_codigo = int(n_par_codigo.getvalue()[0])
+            conn.commit()
+            moveFile(doc_num,nf_num,serie,filial,emissao,n_par_codigo,nome)
+        if entrou == 0:
+            sqlquery = ("UPDATE INTEGRACAO.SF2010_RET SET DT_DOWNLOAD = '' WHERE DOCNUM = '"+doc_num+"'")
+            cur.execute(sqlquery)
+            conn.commit()
+        cur.close()
+        conn.close()
         return
 
 # Mover arquivo para pasta correta
-def moveFile(doc_num,nf_num,serie,filial,emissao,n_par_codigo):
+def moveFile(doc_num,nf_num,serie,filial,emissao,n_par_codigo,nome):
+    print('entrou '+str(n_par_codigo))
     conn = connectDB()
     cur = conn.cursor()
     sqlproc = ("BEGIN SIAOS.PCK_NOTA_FISCAL.SP_NF_ARQUIVO(:1,:2,:3,:4,:5,:6);END;")
