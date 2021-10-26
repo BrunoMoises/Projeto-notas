@@ -36,7 +36,7 @@ def profile():
 
 # Pesquisar arquivos e renomear
 def processFile(nomeFile):
-    for arquivos in os.walk(gb.downloadFolder):
+    for diretorio, subpastas, arquivos in os.walk(gb.downloadFolder):
             for arquivo in arquivos:
                 old_file = os.path.join(gb.downloadFolder, arquivo)
                 new_file = os.path.join(gb.nfseFolder, "%s.pdf" % nomeFile)
