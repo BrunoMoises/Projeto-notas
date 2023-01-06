@@ -3,7 +3,7 @@ import functions as fn
 
 conn = fn.connectDB()
 cur = conn.cursor()
-cur.execute('SELECT * FROM SIAOS.VW_NF_UP_ARQUIVO T')
+cur.execute('SELECT * FROM TABELA')
 
 while True:
     row = cur.fetchone()
